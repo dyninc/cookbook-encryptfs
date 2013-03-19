@@ -25,16 +25,10 @@ end
 
 
 def load_current_resource
-	@current_resource = Chef::Resource::encryptfs.new(@new_resource.name)
+	@current_resource = Chef::Resource::Encryptfs.new(@new_resource.name)
+	@current_resource.name(@new_resource.name)
 	@current_resource.mountpath(new_resource.mountpath)
-#	check = `mount|grep 'on #{new_resource.mountpath} type'`
-	if encryptfs_exists?(@current_resource.mountpath)
-		# If there's already a crypt mount at path, populate it with variables
-#		@current_resource.name(`mount|grep 'on #{new_resource.mountpath} type'|cut -f1 -d' '|sed 's#/dev/mapper/##'`)
-#		@current_resource.filepath(`grep '^#{current_resource.name} ' /etc/crypttab|awk '{ print $2 }'`)
-#		fstats = ::File:stat(current_resource.filepath)
-#		@current_resource.size(fstats.size/1024/1024)
-#		@current_resource.fspath(`mount|grep '^#{new_resource.path} '|cut -f5 -d' '`)
+	if encryptfs_exists?(@current_resource.name)
 		@current_resource.exists = true
 	end
 end		
@@ -66,7 +60,7 @@ def create_encryptfs
 		owner "root"
 		group "root"
 		mode "0644"
-		content "#{new_resources.name} #{new_resource.filepath} /dev/urandom tmp=#{new_resources.fstype},cipher=aes-cbc-essiv:sha256,noearly"
+		content "#{new_resource.name} #{new_resource.filepath} /dev/urandom tmp=#{new_resource.fstype},cipher=aes-cbc-essiv:sha256,noearly"
 		action :create
 		notifies :run, "execute[reload-crypttab]", :immediately
 	end
@@ -77,10 +71,18 @@ def create_encryptfs
 		action :nothing
 	end
 	
+	# Create mount point
+	directory @new_resource.mountpath do
+		owner "root"
+		group "root"
+		action :create
+		recursive true
+	end	
+	
 	# create and mount entry in fstab
 	mount @new_resource.mountpath do
 		device "/dev/mapper/#{new_resource.name}"
-		fstype @new_resource.fstype
+		fstype new_resource.fstype
 		action [ :mount, :enable ]
 	end
 end
@@ -89,7 +91,7 @@ def delete_encryptfs
 	# Unmount and remove entry from fstab
 	mount @new_resource.mountpath do
 		device "/dev/mapper/#{new_resource.name}"
-		fstype @new_resource.fstype
+		fstype new_resource.fstype
 		action [ :unmount, :disable ]
 	end
 
@@ -100,7 +102,7 @@ def delete_encryptfs
 	
 	# deactivate encrypted filesystem
 	execute "remove-encryptfs" do
-		command "/sbin/cryptsetup remove #{new_resources.name}"       
+		command "/sbin/cryptsetup remove #{new_resource.name}"       
 		action :run      
 	end
 	
@@ -114,6 +116,6 @@ def delete_encryptfs
 	# FIXME: Should I remove the cryptsetup package if crypttab is now empty?
 end
 
-def encryptfs_exists?
-	return system("/sbin/cryptsetup status #{new_resource.name}")
+def encryptfs_exists?(name)
+	return system("/sbin/cryptsetup status #{name}")
 end
