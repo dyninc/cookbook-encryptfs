@@ -137,11 +137,14 @@ def encryptfs_exists?(name)
 end
 
 def encryptfs_crypttab_exists?(name)
-	return false if (! ::File.exists?( "/etc/crypttab" ))
-	::File.foreach("/etc/crypttab") do |line|
-		return true if ( line =~ /^#{name} /o )
+		if (! ::File.exists?( "/etc/crypttab" ))
+		return false
 	end
-	Chef::Log.info("#{name} not found in crypttab")
+	::File.foreach("/etc/crypttab") do |line|
+		if ( line =~ /^#{name} / )
+			return true
+		end
+	end
 	return false
 end
 
@@ -155,7 +158,7 @@ end
 def encryptfs_crypttab_delete(name)
 	contents = []
 	::File.readlines("/etc/crypttab").reverse_each do |line|
-		if (!(line =~ /^#{name} /o ))
+		if (!(line =~ /^#{name} / ))
 			contents << line
 		else
 			Chef::Log.info("#{@new_resource} is removed from crypttab")
