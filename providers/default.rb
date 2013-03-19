@@ -55,13 +55,22 @@ def create_encryptfs
 		action :nothing
 	end
 
-	# create entry in /etc/crypttab (FIXME only supports a single crypttab entry)
+	# verify that crypttab is present
 	file "/etc/crypttab" do
 		owner "root"
 		group "root"
 		mode "0644"
-		content "#{new_resource.name} #{new_resource.filepath} /dev/urandom tmp=#{new_resource.fstype},cipher=aes-cbc-essiv:sha256,noearly"
-		action :create
+		action :create_if_missing
+	end
+	
+	# create entry in /etc/crypttab
+	ruby_block "add_crypttab_#{new_resource.name}" do
+		block do
+			if ( !(encryptfs_crypttab_exists?(new_resource.name)) )
+				Chef::Log.info("#{new_resource.name} wasn't found in /etc/crypttab")
+				encryptfs_crypttab_add(new_resource.name, new_resource.filepath, new_resource.fstype)
+			end
+		end
 		notifies :run, "execute[reload-crypttab]", :immediately
 	end
 	
@@ -92,7 +101,7 @@ def delete_encryptfs
 	mount @new_resource.mountpath do
 		device "/dev/mapper/#{new_resource.name}"
 		fstype new_resource.fstype
-		action [ :unmount, :disable ]
+		action [ :umount, :disable ]
 	end
 
 	# delete mount point
@@ -106,7 +115,14 @@ def delete_encryptfs
 		action :run      
 	end
 	
-	# FIXME (need to remove entry from /etc/crypttab
+	# remove encrypted filesystem from crypttab
+	ruby_block "delete_crypttab_#{new_resource.name}" do
+		block do
+			if ( encryptfs_crypttab_exists?(new_resource.name) )
+				encryptfs_crypttab_delete(new_resource.name)
+			end
+		end
+	end
 	
 	# delete file for loop block device
 	file @new_resource.filepath do
@@ -119,3 +135,35 @@ end
 def encryptfs_exists?(name)
 	return system("/sbin/cryptsetup status #{name}")
 end
+
+def encryptfs_crypttab_exists?(name)
+	return false if (! ::File.exists?( "/etc/crypttab" ))
+	::File.foreach("/etc/crypttab") do |line|
+		return true if ( line =~ /^#{name} /o )
+	end
+	Chef::Log.info("#{name} not found in crypttab")
+	return false
+end
+
+def encryptfs_crypttab_add(name, filepath, fstype)
+	newline = "#{name} \t#{filepath}\t /dev/urandom \ttmp=#{fstype},cipher=aes-cbc-essiv:sha256,noearly\n"
+	::File.open("/etc/crypttab", "a") do |crypttab|
+		crypttab.puts(newline)
+	end
+end
+
+def encryptfs_crypttab_delete(name)
+	contents = []
+	::File.readlines("/etc/crypttab").reverse_each do |line|
+		if (!(line =~ /^#{name} /o ))
+			contents << line
+		else
+			Chef::Log.info("#{@new_resource} is removed from crypttab")
+		end
+	end
+	
+	::File.open("/etc/crypttab", "w") do |crypttab|
+		contents.reverse_each { |line| crypttab.puts line }
+	end
+end
+
