@@ -62,17 +62,25 @@ Attributes
 Usage
 -----
 #### encryptfs::default
-Adjust the attributes to suit your needs.  Make sure there's enough room in the
-filesystem that will contain the file for the size specified.
 
-```json
-{
-  "name":"my_node",
-  "run_list": [
-    "recipe[encryptfs]"
-  ]
-}
-```
+Put the following in your cookbook's metadata.rb file to include this LWRP.
+```depends "encryptfs"```
+
+The following added to your recipes will create an encrypted filesystem.
+
+```encryptfs "data" do
+        size 100
+        filepath "/cryptfs"
+        mountpath "/usr/local/cryptdata"
+        fstype "ext4"
+        action :create
+end```
+
+The following added to your recipe will delete an encrypted filesystem:
+```encryptfs "data" do
+	action :delete
+end```
+
 
 License and Authors
 -------------------
