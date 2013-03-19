@@ -11,7 +11,7 @@ case node[:platform]
 when "ubuntu","debian"
 
 	encryptfs "data" do
-		size "100"
+		size 100
 		filepath "/cryptfs"
 		mountpath "/usr/local/cryptdata"
 		fstype "ext4"
