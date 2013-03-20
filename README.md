@@ -23,15 +23,17 @@ Tested on:
 * Debian 6.0
 * Ubuntu 12.04
 
-This cookbook will only work on Debian or Ubuntu systems if the cryptsetup
-package is available.  The cryptsetup package will be installed if it's not
+This cookbook will only work on Debian or Ubuntu systems if the `cryptsetup`
+package is available.  The `cryptsetup` package will be installed if it's not
 already present.
 
 Attributes
 ==========
 * `node['encryptfs'['uninstall_cryptsetup_iflast']` - Sets the cookbook to
-  remove the cryptsetup packages after the last filesystem is removed from
-  /etc/crypttab.  Default is `false`, to leave the packages installed.
+  remove the `cryptsetup` packages after the last filesystem is removed from
+  `/etc/crypttab`.  Default is `false`, to leave the packages installed. Only
+  the `cryptsetup` and `cryptsetup-bin` packages will be uninstalled if this is
+  `true`.
 
 Recipes
 =======
@@ -39,7 +41,8 @@ Recipes
 The default recipe won't do anything.
 
 ## example
-This represents an example of creating a few small encrypted filesystems.
+This represents an example of creating a few small encrypted filesystems. You
+really should be using this only as an LWRP.
 
 Resource/Provider
 =================
@@ -50,7 +53,7 @@ encrypted filesystems.
       size 100
       filepath "/cryptfs"
       mountpath "/usr/local/cryptdata"
-      action [ :create ]
+      action :create
     end
 
 The `size` is specified in megabytes.  The `filepath` is where the file of
@@ -63,7 +66,7 @@ Usage
 =====
 Put the following in your cookbook's metadata.rb file to include this LWRP:
 
-`depends "encryptfs"`
+    depends "encryptfs"
 
 The following added to your recipes will create an encrypted filesystem:
 
@@ -76,6 +79,7 @@ The following added to your recipes will create an encrypted filesystem:
     end
 
 The following added to your recipe will delete an encrypted filesystem:
+
     encryptfs "data" do
       action :delete
     end
