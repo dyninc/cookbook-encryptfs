@@ -87,6 +87,7 @@ The following added to your recipe will delete an encrypted filesystem:
 License and Authors
 -------------------
 Author: Neil Schelly
+
 Copyright 2013, Dyn, Inc
 
 Licensed under the Apache License, Version 2.0 (the "License");
