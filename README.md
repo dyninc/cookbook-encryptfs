@@ -17,7 +17,7 @@ after reboot.
 Requirements
 ============
 
-## Platform:
+## Platform
 
 Tested on:
 * Debian 6.0
@@ -29,7 +29,7 @@ already present.
 
 Attributes
 ==========
-* `node['encryptfs'['uninstall_cryptsetup_iflast'] - Sets the cookbook to
+* `node['encryptfs'['uninstall_cryptsetup_iflast']` - Sets the cookbook to
   remove the cryptsetup packages after the last filesystem is removed from
   /etc/crypttab.  Default is `false`, to leave the packages installed.
 
@@ -46,38 +46,39 @@ Resource/Provider
 This cookbook includes an LWRP, `encryptfs`, for managing one-time-use
 encrypted filesystems.
 
-  encryptfs "data" do
-    size 100
-    filepath "/cryptfs"
-    mountpath "/usr/local/cryptdata"
-    action [ :create ]
-  end
+    encryptfs "data" do
+      size 100
+      filepath "/cryptfs"
+      mountpath "/usr/local/cryptdata"
+      action [ :create ]
+    end
 
-Size is specified in megabytes.  The filepath is where the file of that size is
-to be created in your existing filesystems.  That file will become a loop
-device containing the encrypted block data.  The mountpath will be where the
-encrypted filesystem is to be mounted.  The LWRP supports both :create and a
-:delete actions.
+The `size` is specified in megabytes.  The `filepath` is where the file of
+that size is to be created in your existing filesystems.  That file will
+become a loop device containing the encrypted block data.  The `mountpath` will
+be where the encrypted filesystem is to be mounted.  The LWRP supports both
+`:create` and `:delete` actions.
 
 Usage
 =====
-Put the following in your cookbook's metadata.rb file to include this LWRP.
-```depends "encryptfs"```
+Put the following in your cookbook's metadata.rb file to include this LWRP:
 
-The following added to your recipes will create an encrypted filesystem.
+`depends "encryptfs"`
 
-```encryptfs "data" do
-        size 100
-        filepath "/cryptfs"
-        mountpath "/usr/local/cryptdata"
-        fstype "ext4"
-        action :create
-end```
+The following added to your recipes will create an encrypted filesystem:
+
+    encryptfs "data" do
+      size 100
+      filepath "/cryptfs"
+      mountpath "/usr/local/cryptdata"
+      fstype "ext4"
+      action :create
+    end
 
 The following added to your recipe will delete an encrypted filesystem:
-```encryptfs "data" do
-	action :delete
-end```
+    encryptfs "data" do
+      action :delete
+    end
 
 License and Authors
 -------------------
