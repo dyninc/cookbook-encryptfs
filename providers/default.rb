@@ -31,6 +31,7 @@ action :create do
     converge_by("Create #{ @new_resource }") do
       create_encryptfs
     end
+    new_resource.updated_by_last_action(true)
   end
 end
 
@@ -40,6 +41,7 @@ action :delete do
     converge_by("Delete #{ @new_resource }") do
       delete_encryptfs
     end
+    new_resource.updated_by_last_action(true)
   else
     Chef::Log.info "#{ @current_resource } doesn't exist - can't delete."
   end
@@ -98,6 +100,7 @@ def create_encryptfs
   end
   
   # reload crypttab
+  # FIXME Unfriendly violation of FC004: Use a service resource to start and stop services: ./providers/default.rb:101                                                                                                                                                                                                                                                                                                         
   execute "reload-crypttab" do
     command "/etc/init.d/cryptdisks reload"
     action :nothing
