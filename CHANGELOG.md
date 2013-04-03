@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of encryptfs.
 
+## 1.0.1:
+* Fixed #1: issue where the service cryptdisks reload wasn't a reliable means to
+  ensure that new disks get created/mapped in time to be mounted.
+
 ## 1.0.0:
 * Added an attribute that can be overwridden to control uninstalling the
   cryptsetup and cryptsetup-bin packages if the last crypttab entry is removed.

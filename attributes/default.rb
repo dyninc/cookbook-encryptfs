@@ -21,3 +21,8 @@
 # If the last encryptfs is removed, setting this true will uninstall cryptsetup
 default[:encryptfs][:uninstall_cryptsetup_iflast] = false
 
+# Path to the cryptdisks_start and cryptdisks_stop files
+default[:encryptfs][:cryptdisks_path] = "/sbin" unless node.platform?("ubuntu")
+default[:encryptfs][:cryptdisks_path] = "/usr/sbin" if node.platform?("ubuntu")
+default[:encryptfs][:cryptdisks_start] = "#{node[:encryptfs][:cryptdisks_path]}/cryptdisks_start"
+default[:encryptfs][:cryptdisks_stop] = "#{node[:encryptfs][:cryptdisks_path]}/cryptdisks_stop"

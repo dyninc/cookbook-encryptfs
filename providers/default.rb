@@ -65,6 +65,11 @@ def create_encryptfs
     action [ :install, :upgrade ]
   end
 
+  # Ensure service remains enabled, started, etc
+  service "cryptdisks" do
+    action [ :enable, :start ]
+  end
+
   # create file for loop block device
   file @new_resource.filepath do
     owner "root"
@@ -96,13 +101,13 @@ def create_encryptfs
         encryptfs_crypttab_add(new_resource.name, new_resource.filepath, new_resource.fstype)
       end
     end
-    notifies :reload, "service[cryptdisks]", :immediately
+    notifies :run, "execute[cryptdisks_start]", :immediately
   end
   
   # Provide service to notify, in order to reload crypttab
-  service "cryptdisks" do
-    supports :reload => true, :start => true, :stop =>true 
-    action [ :enable, :start ]
+  execute "cryptdisks_start" do
+    command "#{node[:encryptfs][:cryptdisks_start]} #{new_resource.name}"
+    action :nothing
   end
   
   # Create mount point

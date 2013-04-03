@@ -34,6 +34,10 @@ Attributes
   `/etc/crypttab`.  Default is `false`, to leave the packages installed. Only
   the `cryptsetup` and `cryptsetup-bin` packages will be uninstalled if this is
   `true`.
+* `node['encryptfs']['cryptdisks_path']` `node['encryptfs']['cryptdisks_stop']`
+  `node['encryptfs']['cryptdisks_start']` - All used to set paths for the
+  scripts that are part of the cryptsetup package.  They are in a different
+  place in Ubuntu.
 
 Recipes
 =======
@@ -42,7 +46,7 @@ The default recipe won't do anything.
 
 ## example
 This represents an example of creating a few small encrypted filesystems. You
-really should be using this only as an LWRP.
+really should be using this cookbook only as an LWRP.
 
 Resource/Provider
 =================
@@ -86,9 +90,9 @@ The following added to your recipe will delete an encrypted filesystem:
 
 License and Authors
 -------------------
-Author: Neil Schelly
+Author: Neil Schelly (@neilschelly)
 
-Copyright 2013, Dyn, Inc
+Copyright 2013, Dyn, Inc (@DynInc)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
