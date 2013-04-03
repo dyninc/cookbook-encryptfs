@@ -96,14 +96,13 @@ def create_encryptfs
         encryptfs_crypttab_add(new_resource.name, new_resource.filepath, new_resource.fstype)
       end
     end
-    notifies :run, "execute[reload-crypttab]", :immediately
+    notifies :reload, "service[cryptdisks]", :immediately
   end
   
-  # reload crypttab
-  # FIXME Unfriendly violation of FC004: Use a service resource to start and stop services: ./providers/default.rb:101                                                                                                                                                                                                                                                                                                         
-  execute "reload-crypttab" do
-    command "/etc/init.d/cryptdisks reload"
-    action :nothing
+  # Provide service to notify, in order to reload crypttab
+  service "cryptdisks" do
+    supports :reload => true, :start => true, :stop =>true 
+    action [ :enable, :start ]
   end
   
   # Create mount point
