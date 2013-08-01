@@ -81,7 +81,7 @@ def create_encryptfs
   
   # Set file size for loop file
   execute "set-file-size" do
-    command "/usr/bin/fallocate -l #{new_resource.size}M #{new_resource.filepath}"
+    command "/usr/bin/truncate -s #{new_resource.size}M #{new_resource.filepath}"
     action :nothing
   end
 
